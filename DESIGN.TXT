@@ -1,0 +1,61 @@
+**********************************************************************
+Functions
+***********************************************************************
+
+Proc.h
+	- Created new struct tickets, containing two variables for local and transferable tickets.
+	- In struct thread, I added the tickets struct as variable (td_tickets). and inger td_user as a flag to check if the thread is user.
+
+Runq.h
+	Added the following headers:
+		- Added new macro for the size of random pool ( RAND_LEN =10 )
+		- Added new array (rqtickets[RQ_NQS}) in runq struct to contain the total tickets for each runq from the 64 queues
+		- void	lottery_add(struct runq *, struct thread *, int); /* function to add user lottery to runqs */
+		- struct  thread *lottery_choose(struct runq *rq); /* choose thread to be excuted using lottery */
+
+
+
+sched_ule.c
+	- added 3 new runqs in tdq one for interactive, one for 
+		  timeshare and one for idle
+	- Added the random pool array and its counter.
+	- Created the function update_rand() to update random pool.
+	- Add the 3 new tdqs in tdq_setup(tdq)
+	tdq_runq_add (only modified):
+		- check for if the thread root or user and set the thread flag
+		- All system processes are still handled the same way they 
+		  would be in freeBSD
+		- All user processes would then go into lottery_add(struct runq *, struct thread *, int)
+
+	tdq_choose (only modified)
+		- root processes are handled the same way as the old scheduler.
+		- user porcesse are passed to the lottery_choose function to apply lottery
+
+	sched_nice (only modified)
+		- Check if the thread is user one :-
+					- adjust the thread tickets according to nice value (value *5000 ticket)
+					- put constraint so thread tickets dose not exceed max (100000) or be less than min (1) tickets
+
+
+kern_switch.c
+	runq_lottery_add(runq, td):
+		- use the td_rqindex to allocate the  queue index and the increment the queue total tickets by the thread tickets 
+		- add threads only to queue tail.
+	runq_lottery_choose(runq)
+		- runq = the runq selected
+		- we use old shed method to select runq
+		- we get the total number of tickets in the queue from the array we saved in runq.h
+		- Determine a winner via (random() % total tix) + 1
+		- We itterate the whole queue and find the winner via a
+		  counter that gets compared to the winner, and return the 
+		  thread.
+		  if (current_tickets >= winner) return (td);
+		- Otherwise return NULL
+
+kern_thread.c
+	- we intialize the thread in thread_init with 0 local tickets and 500 transferable tickets
+
+sys_gift.c
+	- created new system call gift 
+	- takes the tickets equally from the giver procces and distriputed equally to the reciver.
+	- uuses flag to tell if the given tickets are local or transeferable.
