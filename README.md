@@ -2,7 +2,7 @@
 FreeBSD Lottery Scheduling
 
 ## Description
-The primary goal of this project is to modify the FreeBSD scheduler to uselottery scheduling rather than the current scheduler.
+The primary goal of this project is to modify the FreeBSD scheduler to use lottery scheduling rather than the current scheduler.
 
 ## Getting Started
 
