@@ -7,7 +7,7 @@ The primary goal of this project is to modify the FreeBSD scheduler to use lotte
 ## Getting Started
 
 ### Dependencies
-* FreeBSD system of virtual machine
+* FreeBSD system
 
 ### Executing program
 
